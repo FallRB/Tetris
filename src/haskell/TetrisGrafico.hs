@@ -1,4 +1,4 @@
-module TetrisCurses where
+module TetrisGrafico where
 
 import Control.Monad
 import Data.Char
