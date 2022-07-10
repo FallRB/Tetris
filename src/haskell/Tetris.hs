@@ -259,12 +259,12 @@ moverBlocos l
     movimentoBlocos _ = []
 
     lacuna:: Fileira -> Fileira
-    lacuna (Nothing: cauda) = Nothing: lacuna' cauda
+    lacuna (Nothing:cauda) = Nothing: lacuna' cauda
     lacuna (cabeca:cauda) | movimentoBloco cabeca = lacuna cauda
     lacuna _ = []
 
     lacuna':: Fileira -> Fileira
-    lacuna' (Nothing:cabeca) = Nothing:lacuna' cauda
+    lacuna' (Nothing:cauda) = Nothing:lacuna' cauda
     lacuna' _ = []
 
     chao:: Fileira -> Fileira
