@@ -255,7 +255,7 @@ moverBlocos l
     eh_lacuna fileira = not (null $ lacuna fileira) && isNothing (head $ lacuna fileira)
 
     movimentoBlocos:: Fileira -> Fileira
-    movimentoBlocos (cabeca:cauda) | movimentoBlocos cabeca = cabeca:movimentoBlocos cauda
+    movimentoBlocos (cabeca:cauda) | movimentoBloco cabeca = cabeca:movimentoBlocos cauda
     movimentoBlocos _ = []
 
     lacuna:: Fileira -> Fileira
