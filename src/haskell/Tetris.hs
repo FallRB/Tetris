@@ -161,7 +161,7 @@ coordenadas (cabeca: cauda) = coordenadas' cabeca (25 - length cauda) ++ coorden
 coordenadas':: Fileira -> Int -> [(Int, Int)]
 coordenadas' [] _ = []
 coordenadas' (cabeca:cauda) y
-  | movimentaBloco cabeca = (y, 9 - length cauda): coordenadas' cauda y
+  | movimentoBloco cabeca = (y, 9 - length cauda): coordenadas' cauda y
   | otherwise = coordenadas' cauda y
 
 -- faz o bloco descer a grade
@@ -246,11 +246,11 @@ linhaCompleta linha = filter (/= Nothing) linha == linha
 -- move o bloco para baixo
 moverBlocos:: Fileira -> Fileira
 moverBlocos l
-  | eh_lacuna (lacuna l) = (Nothing:movimentoBlocos l) ++ cauda (lacuna l) ++ chao l
+  | eh_lacuna (lacuna l) = (Nothing:movimentoBlocos l) ++ tail (lacuna l) ++ chao l
   | otherwise = error "Nunca deve acontecer ?"
   where
     eh_lacuna:: Fileira -> Fileira
-    eh_lacuna fileira = not (null $ lacuna fileira) && ehNada (head $ lacuna fileira)
+    eh_lacuna fileira = not (null $ lacuna fileira) && isNothing (head $ lacuna fileira)
 
     movimentoBlocos:: Fileira -> Fileira
     movimentoBlocos (cabeca:cauda) | movimentoBlocos cabeca = cabeca:movimentoBlocos cauda
@@ -262,7 +262,7 @@ moverBlocos l
     lacuna _ = []
 
     lacuna':: Fileira -> Fileira
-    lacuna' (Nothing:cabeca) = Nothing:lacuna' cauda
+    lacuna' (Nothing:cabeca) = Nothing:lacuna' tail
     lacuna' _ = []
 
     chao:: Fileira -> Fileira
