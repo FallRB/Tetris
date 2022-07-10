@@ -44,8 +44,8 @@ larguraGrade:: Int
 larguraGrade = 10
 
 -- criando o formato dos blocos
-criarForma:: Formato -> Grade
-criarForma forma
+criarFormato:: Formato -> Grade
+criarFormato forma
   | forma == I = preencher criarI
   | forma == J = preencher criarJ
   | forma == L = preencher criarL
@@ -57,7 +57,7 @@ criarForma forma
   where
     bloco formato' origem' = Just (Bloco formato' True origem')
     x = Nothing
-    preencher' linha = replicate 3 x ++ linha ++ replicate 4
+    preencher' linha = replicate 3 x ++ linha ++ replicate 4 x
     -- "f" é uma abreviação para formato, que será usado para operações nas funções
     preencher f
       | length f == 2 = fileiraVazia : map preencher' f ++ [fileiraVazia]
@@ -131,7 +131,7 @@ acelerar = gravidade
 -- adiciona um bloco no topo da grade
 adicionarBloco:: Grade -> Formato -> Grade
 adicionarBloco fileiras formato'
-  | vazio fileiras && not (fimDeJogo fileira) = criarFormato formato' ++ drop 4  fileiras
+  | vazio fileiras && not (fimDeJogo fileiras) = criarFormato formato' ++ drop 4  fileiras
   | otherwise = fileiras
 
 -- atualiza o estado atual da grade pela "gravidade" limpando as linhas e parando os blocos
@@ -140,7 +140,7 @@ atualizarTela = adicionarBloco . gravidade . limparLinhas . congelarBlocos
 
 -- determina quando um determinado bloco está estacionado
 blocoEstacionario:: Maybe Bloco -> Bool
-blocoEstacionario = maybe False (not . moving)
+blocoEstacionario = maybe False (not . movimento)
 
 -- altera os blocos em movimento que pararam de se mover para estacionários
 congelarBlocos:: Grade -> Grade
@@ -159,7 +159,7 @@ coordenadas [] = []
 coordenadas (cabeca: cauda) = coordenadas' cabeca (25 - length cauda) ++ coordenadas cauda
 
 coordenadas':: Fileira -> Int -> [(Int, Int)]
-coordenadas' [] = []
+coordenadas' [] _ = []
 coordenadas' (cabeca:cauda) y
   | movimentaBloco cabeca = (y, 9 - length cauda): coordenadas' cauda y
   | otherwise = coordenadas' cauda y
@@ -179,11 +179,11 @@ ehOrigem grade (x, y) = maybe False origem $ getBloco grade (x, y)
 -- retorna se aquelas coordenadas estão disponíveis
 estaDisponivel:: Grade -> (Int,Int) -> Bool
 estaDisponivel grade (x,y) =
-  and [x > 0, x < alturaGrade, y > 0, y < larguraGrade, not . blocoParado $ getBloco grade (x,y)]
+  and [x > 0, x < alturaGrade, y > 0, y < larguraGrade, not . blocoEstacionario $ getBloco grade (x,y)]
 
 -- retorna as fileiras ausentes da grade
 fileirasAusentes:: Grade -> Int
-fileirasAusentes fileiras = length fileiras - length (removeLinhas fileiras)
+fileirasAusentes fileiras = length fileiras - length (removerLinhas fileiras)
 
 -- retorna uma fileira vazia
 fileiraVazia:: Fileira
@@ -215,7 +215,7 @@ girar _ (_:_) [] = error "Isso não pode acontecer"
 gravidade:: Grade -> Grade
 gravidade fileiras
   | parar fileiras = fileiras
-  | otherwise = transpor . gravidade_fileiras . transpor $ fileiras
+  | otherwise = transpose . gravidade_fileiras . transpose $ fileiras
   where
     gravidade_fileira:: Fileira -> Fileira
     gravidade_fileira [] = []
@@ -275,13 +275,13 @@ moverBlocos l
 moverDireita:: Grade -> Grade
 moverDireita fileiras
   | toqueDireita fileiras = fileiras
-  | otherwise = transpor . gravidade . transpor $ fileiras
+  | otherwise = transpose . gravidade . transpose $ fileiras
 
 -- move o bloco para direita
 moverEsquerda:: Grade -> Grade
 moverEsquerda fileiras
   | toqueEsquerda fileiras = fileiras
-  | otherwise = map reverse . transpor . gravidade . transpor . map reverse $ fileiras
+  | otherwise = map reverse . transpose . gravidade . transpose . map reverse $ fileiras
 
 -- determina quando um determinado bloco está em movimento
 movimentoBloco:: Maybe Bloco -> Bool
@@ -297,11 +297,11 @@ origens grade = filter (ehOrigem grade) (coordenadas grade)
 
 -- determina quando um bloco deve parar de se mover
 parar:: Grade -> Bool
-parar fileiras = any parar' (transpor fileiras) || vazio fileiras
+parar fileiras = any parar' (transpose fileiras) || vazio fileiras
   where
     parar':: Fileira -> Bool
     parar' [] = False
-    parar' fileira | all movimentoBlocos fileira = True
+    parar' fileira | all movimentoBloco fileira = True
     parar' (primeiro:segundo:_) | movimentoBloco primeiro && blocoEstacionario segundo = True
     parar' (_:cauda) = parar' cauda
 
@@ -355,7 +355,7 @@ toqueEsquerda = any movimento . mapMaybe head
 
 -- determina quando não tem blocos em movimento
 vazio:: Grade -> Bool
-vazio fileiras = all vazio' (transpor fileiras)
+vazio fileiras = all vazio' (transpose fileiras)
   where
-    empty':: Fileira -> Bool
-    empty' l = not (any movimento (catMaybes l))
+    vazio':: Fileira -> Bool
+    vazio' l = not (any movimento (catMaybes l))
