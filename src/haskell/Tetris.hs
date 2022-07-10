@@ -148,7 +148,7 @@ congelarBlocos fileiras
   | parar fileiras = map congelarBlocos' fileiras
   | otherwise = fileiras
   where
-    congelarBlocos':: Fileiras -> Fileiras
+    congelarBlocos':: Fileira -> Fileira
     congelarBlocos' [] = []
     congelarBlocos' (Just (Bloco f True o):cauda) = Just (Bloco f False o): congelarBlocos' cauda
     congelarBlocos' b = head b:congelarBlocos' (tail b)
@@ -158,7 +158,7 @@ coordenadas:: Grade -> [(Int, Int)]
 coordenadas [] = []
 coordenadas (cabeca: cauda) = coordenadas' cabeca (25 - length cauda) ++ coordenadas cauda
 
-coordenadas':: Fileiras -> Int -> [(Int, Int)]
+coordenadas':: Fileira -> Int -> [(Int, Int)]
 coordenadas' [] = []
 coordenadas' (cabeca:cauda) y
   | movimentaBloco cabeca = (y, 9 - length cauda): coordenadas' cauda y
@@ -194,7 +194,7 @@ fimDeJogo:: Grade -> Bool
 fimDeJogo = any (not . all movimento . catMaybes) . take 4
 
 -- retorna uma tupla contendo um formato aleatório e um gerador
-formaAleatoria:: RandomGen gerador => gerador -> (Forma, gerador)
+formaAleatoria:: RandomGen gerador => gerador -> (Formato, gerador)
 formaAleatoria gerador = case randomR(0, length [J ..]-1) gerador of (aleatorio,gerador') -> (toEnum aleatorio, gerador')
 
 -- retorna o bloco
@@ -217,7 +217,7 @@ gravidade fileiras
   | parar fileiras = fileiras
   | otherwise = transpor . gravidade_fileiras . transpor $ fileiras
   where
-    gravidade_fileira:: Fileiras -> Fileiras
+    gravidade_fileira:: Fileira -> Fileira
     gravidade_fileira [] = []
     gravidade_fileira (cabeca:cauda) = gravidade_fileiras cabeca : gravidade_fileiras cauda
 
@@ -299,7 +299,7 @@ origens grade = filter (ehOrigem grade) (coordenadas grade)
 parar:: Grade -> Bool
 parar fileiras = any parar' (transpor fileiras) || vazio fileiras
   where
-    parar':: Fileiras -> Bool
+    parar':: Fileira -> Bool
     parar' [] = False
     parar' fileira | all movimentoBlocos fileira = True
     parar' (primeiro:segundo:_) | movimentoBloco primeiro && blocoEstacionario segundo = True
