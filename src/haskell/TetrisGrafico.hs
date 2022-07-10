@@ -16,7 +16,7 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
   vermelho <- newColorID ColorRed ColorRed 3
   amarelo <- newColorID ColorYellow ColorYellow 4
   ciano <- newColorID ColorCyan ColorCyan 5
-  verde <- newColorID ColorGreen ColorGreenn 6
+  verde <- newColorID ColorGreen ColorGreen 6
   magenta <- newColorID ColorMagenta ColorMagenta 7
   branco <- newColorID ColorWhite ColorWhite 8
   textoEmVermelho <- newColorID ColorRed ColorDefault 9
@@ -84,7 +84,7 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
         drawString "                      "
 
       updateScreen :: Grade -> Int -> StdGen -> [Int] -> Bool -> Curses [Int]
-      updateScreen gameState currentScore gen highScores updatable = do
+      updateScreen gameState currentScore gen lvl highScores updatable = do
         let
           gameEnded = fimDeJogo gameState
           newHighScores
@@ -94,22 +94,22 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
         updateWindow w $ do
           drawBlocks gameState
           drawScore currentScore
-          drawLevel
+          drawLevel lvl
           when gameEnded drawGameOver
           drawHighScores newHighScores
         render
         ev <- getEvent w (Just ((1+(9-toInteger lvl))*100))
         case ev of
-          Nothing -> updateScreen state newScore gen' newHighScores newUpd
+          Nothing -> updateScreen state newScore gen' lvl newHighScores newUpd
           Just ev'
             | ev' == EventCharacter 'q' -> return newHighScores
-            | ev' == EventSpecialKey KeyLeftArrow -> updateScreen (moverEsquerda state) newScore gen' newHighScores newUpd
-            | ev' == EventSpecialKey KeyRightArrow -> updateScreen (moverDireita state) newScore gen' newHighScores newUpd
-            | ev' == EventSpecialKey KeyDownArrow -> updateScreen (acelerar state) newScore gen' newHighScores newUpd
-            | ev' == EventSpecialKey KeyUpArrow -> updateScreen (rotacionar state) newScore gen' newHighScores newUpd
-            | ev' == EventCharacter ' ' -> updateScreen (descerBloco state) newScore gen' newHighScores newUpd
+            | ev' == EventSpecialKey KeyLeftArrow -> updateScreen (moverEsquerda state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventSpecialKey KeyRightArrow -> updateScreen (moverDireita state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventSpecialKey KeyDownArrow -> updateScreen (acelerar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventSpecialKey KeyUpArrow -> updateScreen (rotacionar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter ' ' -> updateScreen (descerBloco state) newScore gen' lvl newHighScores newUpd
             | ev' == EventCharacter 'r' -> game newHighScores
-            | otherwise -> updateScreen state newScore gen' newHighScores newUpd
+            | otherwise -> updateScreen state newScore gen' lvl newHighScores newUpd
         where
           (nextshape, gen') = formaAleatoria gen
           state = atualizarTela gameState nextshape
