@@ -219,7 +219,9 @@ gravidade fileiras
   where
     gravidade_fileira:: Fileira -> Fileira
     gravidade_fileira [] = []
-    gravidade_fileira (cabeca:cauda) = gravidade_fileiras cabeca : gravidade_fileiras cauda
+    gravidade_fileira fileira@(cabeca:cauda)
+        | movimentoBloco cabeca = moverBlocos fileira
+        | otherwise = cabeca : gravidade_fileira cauda
 
     gravidade_fileiras:: Grade -> Grade
     gravidade_fileiras [] = []
@@ -247,7 +249,7 @@ linhaCompleta linha = filter (/= Nothing) linha == linha
 moverBlocos:: Fileira -> Fileira
 moverBlocos l
   | eh_lacuna (lacuna l) = (Nothing:movimentoBlocos l) ++ tail (lacuna l) ++ chao l
-  | otherwise = error "Nunca deve acontecer ?"
+  | otherwise = error "Nunca deve acontecer?"
   where
     eh_lacuna:: Fileira -> Fileira
     eh_lacuna fileira = not (null $ lacuna fileira) && isNothing (head $ lacuna fileira)
@@ -262,7 +264,7 @@ moverBlocos l
     lacuna _ = []
 
     lacuna':: Fileira -> Fileira
-    lacuna' (Nothing:cabeca) = Nothing:lacuna' tail
+    lacuna' (Nothing:cabeca) = Nothing:lacuna' cauda
     lacuna' _ = []
 
     chao:: Fileira -> Fileira
