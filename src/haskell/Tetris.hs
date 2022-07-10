@@ -251,7 +251,7 @@ moverBlocos l
   | eh_lacuna (lacuna l) = (Nothing:movimentoBlocos l) ++ tail (lacuna l) ++ chao l
   | otherwise = error "Nunca deve acontecer?"
   where
-    eh_lacuna:: Fileira -> Fileira
+    eh_lacuna:: Fileira -> Bool
     eh_lacuna fileira = not (null $ lacuna fileira) && isNothing (head $ lacuna fileira)
 
     movimentoBlocos:: Fileira -> Fileira
