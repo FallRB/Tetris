@@ -4,7 +4,7 @@ import TetrisGrafico
 main:: IO()
 main = do
   pontuacao <- getPontuacao
-  pontuacaoNova <- jogarOJogo pontuacao
+  pontuacaoNova <- playGame pontuacao
   guardarPontuacao pontuacaoNova
 
 getPontuacao:: IO [Int]
