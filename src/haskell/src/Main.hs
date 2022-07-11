@@ -1,6 +1,8 @@
 import System.Directory
 import TetrisGrafico
 
+module Main() where
+
 main:: IO()
 main = do
   pontuacao <- getPontuacao
