@@ -1,7 +1,5 @@
 name:                tetris
 version:             0.1.0.0
-license:             MIT
-license-file:        LICENSE
 author:              Haukur Rosinkranz & Christophe Vilain
 maintainer:          hauxir@gmail.com
 category:            Game
