@@ -8,27 +8,27 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
-jogarOJogo :: [Int] -> IO [Int]
-jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
+playGame :: [Int] -> IO [Int]
+playGame theHighScores = newStdGen >>= \g -> runCurses $ do
   w <- defaultWindow
   gridcolor <- newColorID ColorBlue ColorDefault 1
-  azul <- newColorID ColorBlue ColorBlue 2
-  vermelho <- newColorID ColorRed ColorRed 3
-  amarelo <- newColorID ColorYellow ColorYellow 4
-  ciano <- newColorID ColorCyan ColorCyan 5
-  verde <- newColorID ColorGreen ColorGreen 6
-  magenta <- newColorID ColorMagenta ColorMagenta 7
-  branco <- newColorID ColorWhite ColorWhite 8
-  textoEmVermelho <- newColorID ColorRed ColorDefault 9
+  red <- newColorID ColorRed ColorRed 2
+  green <- newColorID ColorGreen ColorGreen 3
+  blue <- newColorID ColorBlue ColorBlue 4
+  yellow <- newColorID ColorYellow ColorYellow 5
+  cyan <- newColorID ColorCyan ColorCyan 6
+  white <- newColorID ColorWhite ColorWhite 7
+  magenta <- newColorID ColorMagenta ColorMagenta 8
+  redtext <- newColorID ColorRed ColorDefault 9
   let
       draw :: Maybe Bloco -> Update()
-      draw (Just (Bloco I _ _)) = drawBlock azul
-      draw (Just (Bloco S _ _)) = drawBlock vermelho
-      draw (Just (Bloco O _ _)) = drawBlock amarelo
-      draw (Just (Bloco T _ _)) = drawBlock ciano
-      draw (Just (Bloco Z _ _)) = drawBlock verde
-      draw (Just (Bloco J _ _)) = drawBlock magenta
-      draw (Just (Bloco L _ _)) = drawBlock branco
+      draw (Just (Bloco I _ _)) = drawBlock red
+      draw (Just (Bloco S _ _)) = drawBlock green
+      draw (Just (Bloco O _ _)) = drawBlock blue
+      draw (Just (Bloco T _ _)) = drawBlock yellow
+      draw (Just (Bloco Z _ _)) = drawBlock cyan
+      draw (Just (Bloco J _ _)) = drawBlock white
+      draw (Just (Bloco L _ _)) = drawBlock magenta
       draw Nothing = drawBlock gridcolor
 
       drawBlocks :: Grade -> Update()
@@ -50,7 +50,7 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
       drawGameOver :: Update()
       drawGameOver = do
         moveCursor (gridY + quot rows 2) (gridX + 8)
-        setColor textoEmVermelho
+        setColor redtext
         drawString "         "
         moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
         drawString "     GAME OVER!     "
@@ -67,23 +67,26 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
       drawHighScores :: [Int] -> Update ()
       drawHighScores scores = setColor gridcolor >> forM_ (zip [1..] scores) drawHighScore
 
-      drawLevel :: Update()
-      drawLevel = do
+      drawLevel :: Int -> Update()
+      drawLevel level = do
         moveCursor (gridY - 1) (gridX + 15)
         setColor gridcolor
+        drawString ("Level: " ++ show level)
 
       levelMenu = do
-        setColor gridcolor
+        setColor redtext
         drawString "                    "
         moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
-        drawString "    Press 'S' to Start Game:   "
+        drawString "    Choose level:   "
+        moveCursor (gridY + quot rows 2 + 2) (gridX + 2)
+        drawString "        0-9         "
 
       clearStats = do
         moveCursor (gridY - 1) (gridX + 1)
         setColor gridcolor
         drawString "                      "
 
-      updateScreen :: Grade -> Int -> StdGen -> [Int] -> Bool -> Curses [Int]
+      updateScreen :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
       updateScreen gameState currentScore gen lvl highScores updatable = do
         let
           gameEnded = fimDeJogo gameState
@@ -125,8 +128,8 @@ jogarOJogo theHighScores = newStdGen >>= \g -> runCurses $ do
         ev <- getEvent w Nothing
         case ev of
           Nothing -> game scores
-          Just (EventCharacter c) --continuar
-            | c == 's' -> updateScreen novoJogo 0 g (digitToInt c) scores True
+          Just (EventCharacter c)
+            | isNumber c -> updateScreen novoJogo 0 g (digitToInt c) scores True
             | c == 'q' -> return scores
           Just _ -> game scores
 
@@ -165,9 +168,9 @@ drawHighScore (i, s) = do
   drawString $ printf "%d.%10d" i s
 
 gridTop, gridMiddle, gridBottom :: String
-gridTop    = " ******************** "
-gridMiddle = "*                    *"
-gridBottom = " ******************** "
+gridTop    = " ____________________ "
+gridMiddle = "|                    |"
+gridBottom = " -------------------- "
 
 block :: String
 block = " ."
