@@ -1,7 +1,7 @@
+module Main where
+
 import System.Directory
 import TetrisGrafico
-
-module Main() where
 
 main:: IO()
 main = do
