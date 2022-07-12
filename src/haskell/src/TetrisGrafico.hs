@@ -31,35 +31,35 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       desenhar (Just (Bloco L _ _)) = drawBlock magenta
       desenhar Nothing = drawBlock corGrade
 
-      drawBlocks :: Grade -> Update()
-      drawBlocks [] = return ()
-      drawBlocks l@(h:t) = do
-        when (length l <= fromIntegral rows) $ drawLine h y
-        drawBlocks t
+      desenharBlocos :: Grade -> Update()
+      desenharBlocos [] = return ()
+      desenharBlocos l@(h:t) = do
+        when (length l <= fromIntegral fileiras) $ drawLine h y
+        desenharBlocos t
         where
-          y = (gridY+rows)- toInteger (length t)
+          y = (gradeY+fileiras)- toInteger (length t)
 
       drawLine :: Fileira -> Integer -> Update()
       drawLine [] _ = return ()
       drawLine (h:t) y = do
-        let x = columns - (toInteger (length block) * toInteger (length t))
-        moveCursor y $ gridX + x + columns
+        let x = colunas - (toInteger (length bloco) * toInteger (length t))
+        moveCursor y $ gradeX + x + colunas
         desenhar h
         drawLine t y
 
       drawGameOver :: Update()
       drawGameOver = do
-        moveCursor (gridY + quot rows 2) (gridX + 8)
+        moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
         setColor corTexto
         drawString "         "
-        moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
+        moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
         drawString "     GAME OVER!     "
-        moveCursor (gridY + quot rows 2 + 2) (gridX + 2)
+        moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
         drawString " press 'r' to retry "
 
       drawScore :: Int -> Update()
       drawScore scoreValue = do
-        moveCursor (gridY - 1) (gridX + 1)
+        moveCursor (gradeY - 1) (gradeX + 1)
         setColor corTexto
         let scorestr = show scoreValue
         drawString ("Pontuação: " ++ scorestr)
@@ -69,20 +69,20 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
       drawLevel :: Int -> Update()
       drawLevel level = do
-        moveCursor (gridY - 1) (gridX + 15)
+        moveCursor (gradeY - 1) (gradeX + 15)
         setColor corTexto
         drawString ("Nível: " ++ show level)
 
       levelMenu = do
         setColor corTexto
         drawString "                    "
-        moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
+        moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
         drawString "    Choose level:   "
-        moveCursor (gridY + quot rows 2 + 2) (gridX + 2)
+        moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
         drawString "        0-9         "
 
       clearStats = do
-        moveCursor (gridY - 1) (gridX + 1)
+        moveCursor (gradeY - 1) (gradeX + 1)
         setColor corGrade
         drawString "                      "
 
@@ -95,7 +95,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
             | otherwise = highScores
           newUpd = not gameEnded
         updateWindow janela $ do
-          drawBlocks gameState
+          desenharBlocos gameState
           drawScore currentScore
           drawLevel lvl
           when gameEnded drawGameOver
@@ -120,7 +120,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
       game :: [Int] -> Curses [Int]
       game scores = do
-        updateWindow janela $ drawGrid gridY gridX corGrade
+        updateWindow janela $ drawGrid gradeY gradeX corGrade
         updateWindow janela levelMenu
         updateWindow janela clearStats
         updateWindow janela $ drawHighScores scores
@@ -140,49 +140,49 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 drawBlock :: ColorID -> Update()
 drawBlock color = do
   setColor color
-  drawString block
+  drawString bloco
 
 drawGrid :: Integer -> Integer -> ColorID -> Update()
 drawGrid y x c = do
   setColor c
   moveCursor y (x+1)
-  drawString gridTop
+  drawString gradeTopo
   drawLines (y+1) (x+1)
-  moveCursor (rows+y+1) (x+1)
-  drawString gridBottom
+  moveCursor (fileiras+y+1) (x+1)
+  drawString gradeBaixo
 
 drawLines :: Integer -> Integer -> Update()
-drawLines y x = drawLines' y x rows
+drawLines y x = drawLines' y x fileiras
 
 drawLines' :: Integer -> Integer -> Integer -> Update()
 drawLines' y x n
   | n < 1 = return()
   | otherwise = do
       moveCursor y x
-      drawString gridMiddle
+      drawString gradeMeio
       drawLines' (y+1) x (n-1)
 
 drawHighScore :: (Integer, Int) -> Update ()
 drawHighScore (i, s) = do
-  moveCursor (gridY + rows + 1 + i) (gridX + 6)
+  moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
   drawString $ printf "%d.%10d" i s
 
-gridTop, gridMiddle, gridBottom :: String
-gridTop    = " ____________________ "
-gridMiddle = "|                    |"
-gridBottom = " -------------------- "
+gradeTopo, gradeMeio, gradeBaixo :: String
+gradeTopo    = " ____________________ "
+gradeMeio = "|                    |"
+gradeBaixo = " -------------------- "
 
-block :: String
-block = " ."
+bloco :: String
+bloco = " ."
 
-gridX :: Integer
-gridX = 50
+gradeX :: Integer
+gradeX = 50
 
-gridY :: Integer
-gridY = 4
+gradeY :: Integer
+gradeY = 4
 
-rows :: Integer
-rows = toInteger (length novoJogo - 4)
+fileiras :: Integer
+fileiras = toInteger (length novoJogo - 4)
 
-columns :: Integer
-columns = toInteger (length (head novoJogo))
+colunas :: Integer
+colunas = toInteger (length (head novoJogo))
