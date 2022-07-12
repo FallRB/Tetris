@@ -22,14 +22,14 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   corTexto <- newColorID ColorRed ColorDefault 9
   let
       desenhar:: Maybe Bloco -> Update()
-      desenhar (Just (Bloco I _ _)) = drawBlock vermelho
-      desenhar (Just (Bloco S _ _)) = drawBlock verde
-      desenhar (Just (Bloco O _ _)) = drawBlock azul
-      desenhar (Just (Bloco T _ _)) = drawBlock amarelo
-      desenhar (Just (Bloco Z _ _)) = drawBlock ciano
-      desenhar (Just (Bloco J _ _)) = drawBlock branco
-      desenhar (Just (Bloco L _ _)) = drawBlock magenta
-      desenhar Nothing = drawBlock corGrade
+      desenhar (Just (Bloco I _ _)) = desenharBloco vermelho
+      desenhar (Just (Bloco S _ _)) = desenharBloco verde
+      desenhar (Just (Bloco O _ _)) = desenharBloco azul
+      desenhar (Just (Bloco T _ _)) = desenharBloco amarelo
+      desenhar (Just (Bloco Z _ _)) = desenharBloco ciano
+      desenhar (Just (Bloco J _ _)) = desenharBloco branco
+      desenhar (Just (Bloco L _ _)) = desenharBloco magenta
+      desenhar Nothing = desenharBloco corGrade
 
       desenharBlocos :: Grade -> Update()
       desenharBlocos [] = return ()
@@ -65,7 +65,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         drawString ("Pontuação: " ++ scorestr)
 
       drawHighScores :: [Int] -> Update ()
-      drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) drawHighScore
+      drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarMaiorPontuacao
 
       drawLevel :: Int -> Update()
       drawLevel level = do
@@ -137,8 +137,8 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   setEcho False
   game placar
 
-drawBlock :: ColorID -> Update()
-drawBlock color = do
+desenharBloco :: ColorID -> Update()
+desenharBloco color = do
   setColor color
   drawString bloco
 
@@ -162,8 +162,8 @@ drawLines' y x n
       drawString gradeMeio
       drawLines' (y+1) x (n-1)
 
-drawHighScore :: (Integer, Int) -> Update ()
-drawHighScore (i, s) = do
+mostrarMaiorPontuacao :: (Integer, Int) -> Update ()
+mostrarMaiorPontuacao (i, s) = do
   moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
   drawString $ printf "%d.%10d" i s
 
