@@ -34,18 +34,18 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       desenharBlocos :: Grade -> Update()
       desenharBlocos [] = return ()
       desenharBlocos l@(h:t) = do
-        when (length l <= fromIntegral fileiras) $ drawLine h y
+        when (length l <= fromIntegral fileiras) $ desenharLinha h y
         desenharBlocos t
         where
           y = (gradeY+fileiras)- toInteger (length t)
 
-      drawLine :: Fileira -> Integer -> Update()
-      drawLine [] _ = return ()
-      drawLine (h:t) y = do
+      desenharLinha :: Fileira -> Integer -> Update()
+      desenharLinha [] _ = return ()
+      desenharLinha (h:t) y = do
         let x = colunas - (toInteger (length bloco) * toInteger (length t))
         moveCursor y $ gradeX + x + colunas
         desenhar h
-        drawLine t y
+        desenharLinha t y
 
       drawGameOver :: Update()
       drawGameOver = do
@@ -57,8 +57,8 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
         drawString " press 'r' to retry "
 
-      drawScore :: Int -> Update()
-      drawScore scoreValue = do
+      mostrarPontuacao :: Int -> Update()
+      mostrarPontuacao scoreValue = do
         moveCursor (gradeY - 1) (gradeX + 1)
         setColor corTexto
         let scorestr = show scoreValue
@@ -96,7 +96,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
           newUpd = not gameEnded
         updateWindow janela $ do
           desenharBlocos gameState
-          drawScore currentScore
+          mostrarPontuacao currentScore
           drawLevel lvl
           when gameEnded drawGameOver
           drawHighScores newHighScores
@@ -147,20 +147,20 @@ drawGrid y x c = do
   setColor c
   moveCursor y (x+1)
   drawString gradeTopo
-  drawLines (y+1) (x+1)
+  desenharLinhas (y+1) (x+1)
   moveCursor (fileiras+y+1) (x+1)
   drawString gradeBaixo
 
-drawLines :: Integer -> Integer -> Update()
-drawLines y x = drawLines' y x fileiras
+desenharLinhas :: Integer -> Integer -> Update()
+desenharLinhas y x = desenharLinhas' y x fileiras
 
-drawLines' :: Integer -> Integer -> Integer -> Update()
-drawLines' y x n
+desenharLinhas' :: Integer -> Integer -> Integer -> Update()
+desenharLinhas' y x n
   | n < 1 = return()
   | otherwise = do
       moveCursor y x
       drawString gradeMeio
-      drawLines' (y+1) x (n-1)
+      desenharLinhas' (y+1) x (n-1)
 
 mostrarMaiorPontuacao :: (Integer, Int) -> Update ()
 mostrarMaiorPontuacao (i, s) = do
