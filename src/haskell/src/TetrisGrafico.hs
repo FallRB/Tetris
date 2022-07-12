@@ -21,15 +21,15 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   magenta <- newColorID ColorMagenta ColorMagenta 8
   corTexto <- newColorID ColorRed ColorDefault 9
   let
-      draw :: Maybe Bloco -> Update()
-      draw (Just (Bloco I _ _)) = drawBlock vermelho
-      draw (Just (Bloco S _ _)) = drawBlock verde
-      draw (Just (Bloco O _ _)) = drawBlock azul
-      draw (Just (Bloco T _ _)) = drawBlock amarelo
-      draw (Just (Bloco Z _ _)) = drawBlock ciano
-      draw (Just (Bloco J _ _)) = drawBlock branco
-      draw (Just (Bloco L _ _)) = drawBlock magenta
-      draw Nothing = drawBlock corGrade
+      desenhar:: Maybe Bloco -> Update()
+      desenhar (Just (Bloco I _ _)) = drawBlock vermelho
+      desenhar (Just (Bloco S _ _)) = drawBlock verde
+      desenhar (Just (Bloco O _ _)) = drawBlock azul
+      desenhar (Just (Bloco T _ _)) = drawBlock amarelo
+      desenhar (Just (Bloco Z _ _)) = drawBlock ciano
+      desenhar (Just (Bloco J _ _)) = drawBlock branco
+      desenhar (Just (Bloco L _ _)) = drawBlock magenta
+      desenhar Nothing = drawBlock corGrade
 
       drawBlocks :: Grade -> Update()
       drawBlocks [] = return ()
@@ -44,7 +44,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       drawLine (h:t) y = do
         let x = columns - (toInteger (length block) * toInteger (length t))
         moveCursor y $ gridX + x + columns
-        draw h
+        desenhar h
         drawLine t y
 
       drawGameOver :: Update()
