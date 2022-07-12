@@ -50,7 +50,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       mostrarFimDeJogo :: Update()
       mostrarFimDeJogo = do
         moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
-        setCor corTexto
+        setColor corTexto
         drawString "         "
         moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
         drawString "     FIM DE JOGO!    "
@@ -60,36 +60,36 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       mostrarPontos :: Int -> Update()
       mostrarPontos scoreValue = do
         moveCursor (gradeY - 1) (gradeX + 1)
-        setCor corTexto
+        setColor corTexto
         let scorestr = show scoreValue
         drawString ("Pontuação: " ++ scorestr)
 
       mostrarMaiorPontuacao :: [Int] -> Update ()
-      mostrarMaiorPontuacao pontos = setCor corTexto >> forM_ (zip [1..] pontos) mostrarMaiorPontuacao
+      mostrarMaiorPontuacao pontos = setColor corTexto >> forM_ (zip [1..] pontos) mostrarMaiorPontuacao
 
       mostrarNivel :: Int -> Update()
       mostrarNivel level = do
         moveCursor (gradeY - 1) (gradeX + 15)
-        setCor corTexto
+        setColor corTexto
 
       levelMenu = do
-        setCor corTexto
+        setColor corTexto
         drawString "                    "
         moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
         drawString " 's' para começar"
 
       limparStatus = do
         moveCursor (gradeY - 1) (gradeX + 1)
-        setCor corGrade
+        setColor corGrade
         drawString "                      "
 
       atualizarTela :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
-      atualizarTela estadoJogo pontuacaoAtual gen maioresPontos updatable = do
+      atualizarTela estadoJogo pontuacaoAtual gen highScores updatable = do
         let
           finalDeJogo = fimDeJogo estadoJogo
           novoMaxPontos
-            | finalDeJogo && updatable = take 5 . reverse . sort $ pontuacaoAtual : maioresPontos
-            | otherwise = maioresPontos
+            | finalDeJogo && updatable = take 5 . reverse . sort $ pontuacaoAtual : highScores
+            | otherwise = highScores
           novaAtualizacao = not finalDeJogo
         atualizarTela janela $ do
           desenharBlocos estadoJogo
@@ -136,12 +136,12 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
 desenharBloco :: ColorID -> Update()
 desenharBloco cor = do
-  setCor cor
+  setColor cor
   drawString bloco
 
 desenharGrade :: Integer -> Integer -> ColorID -> Update()
 desenharGrade y x c = do
-  setCor c
+  setColor c
   moveCursor y (x+1)
   drawString gradeTopo
   desenharLinhas (y+1) (x+1)
