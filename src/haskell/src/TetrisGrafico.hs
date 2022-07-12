@@ -8,28 +8,28 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
-iniciarJogo :: [Int] -> IO [Int]
+iniciarJogo:: [Int] -> IO [Int]
 iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   janela <- defaultWindow
-  gridcolor <- newColorID ColorBlue ColorDefault 1
-  red <- newColorID ColorRed ColorRed 2
-  green <- newColorID ColorGreen ColorGreen 3
-  blue <- newColorID ColorBlue ColorBlue 4
-  yellow <- newColorID ColorYellow ColorYellow 5
-  cyan <- newColorID ColorCyan ColorCyan 6
-  white <- newColorID ColorWhite ColorWhite 7
+  corGrade <- newColorID ColorBlue ColorDefault 1
+  vermelho <- newColorID ColorRed ColorRed 2
+  verde <- newColorID ColorGreen ColorGreen 3
+  azul <- newColorID ColorBlue ColorBlue 4
+  amarelo <- newColorID ColorYellow ColorYellow 5
+  ciano <- newColorID ColorCyan ColorCyan 6
+  branco <- newColorID ColorWhite ColorWhite 7
   magenta <- newColorID ColorMagenta ColorMagenta 8
-  redtext <- newColorID ColorRed ColorDefault 9
+  corTexto <- newColorID ColorRed ColorDefault 9
   let
       draw :: Maybe Bloco -> Update()
-      draw (Just (Bloco I _ _)) = drawBlock red
-      draw (Just (Bloco S _ _)) = drawBlock green
-      draw (Just (Bloco O _ _)) = drawBlock blue
-      draw (Just (Bloco T _ _)) = drawBlock yellow
-      draw (Just (Bloco Z _ _)) = drawBlock cyan
-      draw (Just (Bloco J _ _)) = drawBlock white
+      draw (Just (Bloco I _ _)) = drawBlock vermelho
+      draw (Just (Bloco S _ _)) = drawBlock verde
+      draw (Just (Bloco O _ _)) = drawBlock azul
+      draw (Just (Bloco T _ _)) = drawBlock amarelo
+      draw (Just (Bloco Z _ _)) = drawBlock ciano
+      draw (Just (Bloco J _ _)) = drawBlock branco
       draw (Just (Bloco L _ _)) = drawBlock magenta
-      draw Nothing = drawBlock gridcolor
+      draw Nothing = drawBlock corGrade
 
       drawBlocks :: Grade -> Update()
       drawBlocks [] = return ()
@@ -50,7 +50,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       drawGameOver :: Update()
       drawGameOver = do
         moveCursor (gridY + quot rows 2) (gridX + 8)
-        setColor redtext
+        setColor corTexto
         drawString "         "
         moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
         drawString "     GAME OVER!     "
@@ -60,21 +60,21 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       drawScore :: Int -> Update()
       drawScore scoreValue = do
         moveCursor (gridY - 1) (gridX + 1)
-        setColor gridcolor
+        setColor corTexto
         let scorestr = show scoreValue
-        drawString ("Score: " ++ scorestr)
+        drawString ("Pontuação: " ++ scorestr)
 
       drawHighScores :: [Int] -> Update ()
-      drawHighScores scores = setColor gridcolor >> forM_ (zip [1..] scores) drawHighScore
+      drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) drawHighScore
 
       drawLevel :: Int -> Update()
       drawLevel level = do
         moveCursor (gridY - 1) (gridX + 15)
-        setColor gridcolor
-        drawString ("Level: " ++ show level)
+        setColor corTexto
+        drawString ("Nível: " ++ show level)
 
       levelMenu = do
-        setColor redtext
+        setColor corTexto
         drawString "                    "
         moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
         drawString "    Choose level:   "
@@ -83,7 +83,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
       clearStats = do
         moveCursor (gridY - 1) (gridX + 1)
-        setColor gridcolor
+        setColor corGrade
         drawString "                      "
 
       updateScreen :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
@@ -120,7 +120,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
       game :: [Int] -> Curses [Int]
       game scores = do
-        updateWindow janela $ drawGrid gridY gridX gridcolor
+        updateWindow janela $ drawGrid gridY gridX corGrade
         updateWindow janela levelMenu
         updateWindow janela clearStats
         updateWindow janela $ drawHighScores scores
