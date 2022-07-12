@@ -47,15 +47,15 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         desenhar h
         desenharLinha t y
 
-      finalDoJogo :: Update()
-      finalDoJogo = do
+      desenharFimDeJogo  :: Update()
+      desenharFimDeJogo  = do
         moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
         setColor corTexto
         drawString "         "
         moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
-        drawString "     FIM DO JOGO!     "
+        drawString "    FIM DO JOGO!   "
         moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
-        drawString " digite 'r' para reiniciar "
+        drawString " 'r' para reiniciar "
 
       mostrarPontuacao :: Int -> Update()
       mostrarPontuacao scoreValue = do
@@ -98,7 +98,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
           desenharBlocos gameState
           mostrarPontuacao currentScore
           drawLevel lvl
-          when gameEnded finalDoJogo
+          when gameEnded desenharFimDeJogo 
           drawHighScores newHighScores
         render
         ev <- getEvent janela (Just ((1+(9-toInteger lvl))*100))
