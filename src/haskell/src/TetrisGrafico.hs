@@ -115,7 +115,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
             | otherwise -> atualizaTela state newScore gen' lvl newHighScores newUpd
         where
           (nextshape, gen') = formaAleatoria gen
-          state = atualizarTela gameState nextshape
+          state = atualizar gameState nextshape
           newScore = currentScore + (pontuacao gameState*(1+lvl))
 
       game :: [Int] -> Curses [Int]
