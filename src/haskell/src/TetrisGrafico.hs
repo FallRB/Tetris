@@ -1,7 +1,6 @@
 module TetrisGrafico where
 
 import Control.Monad
-import Data.Char
 import Data.List
 import System.Random
 import Tetris
@@ -67,27 +66,24 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       drawHighScores :: [Int] -> Update ()
       drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarMaiorPontuacao
 
-      drawLevel :: Int -> Update()
-      drawLevel level = do
+      drawLevel :: Update()
+      drawLevel = do
         moveCursor (gradeY - 1) (gradeX + 15)
         setColor corTexto
-        drawString ("Nível: " ++ show level)
 
       levelMenu = do
         setColor corTexto
         drawString "                    "
         moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
-        drawString "    Choose level:   "
-        moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
-        drawString "        0-9         "
+        drawString " 's' para começar"
 
       clearStats = do
         moveCursor (gradeY - 1) (gradeX + 1)
         setColor corGrade
         drawString "                      "
 
-      atualizaTela :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
-      atualizaTela gameState currentScore gen lvl highScores updatable = do
+      atualizaTela :: Grade -> Int -> StdGen -> [Int] -> Bool -> Curses [Int]
+      atualizaTela gameState currentScore gen highScores updatable = do
         let
           gameEnded = fimDeJogo gameState
           newHighScores
@@ -97,26 +93,26 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         updateWindow janela $ do
           desenharBlocos gameState
           mostrarPontuacao currentScore
-          drawLevel lvl
-          when gameEnded desenharFimDeJogo 
+          drawLevel
+          when gameEnded desenharFimDeJogo
           drawHighScores newHighScores
         render
-        ev <- getEvent janela (Just ((1+(9-toInteger lvl))*100))
+        ev <- getEvent janela (Just (10*100))
         case ev of
-          Nothing -> atualizaTela state newScore gen' lvl newHighScores newUpd
+          Nothing -> atualizaTela state newScore gen' newHighScores newUpd
           Just ev'
             | ev' == EventCharacter 'q' -> return newHighScores
-            | ev' == EventCharacter 'a' -> atualizaTela (moverEsquerda state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 'd' -> atualizaTela (moverDireita state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 's' -> atualizaTela (acelerar state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 'w' -> atualizaTela (rotacionar state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter ' ' -> atualizaTela (descerBloco state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'a' -> atualizaTela (moverEsquerda state) newScore gen'  newHighScores newUpd
+            | ev' == EventCharacter 'd' -> atualizaTela (moverDireita state) newScore gen'  newHighScores newUpd
+            | ev' == EventCharacter 's' -> atualizaTela (acelerar state) newScore gen'  newHighScores newUpd
+            | ev' == EventCharacter 'w' -> atualizaTela (rotacionar state) newScore gen'  newHighScores newUpd
+            | ev' == EventCharacter ' ' -> atualizaTela (descerBloco state) newScore gen'  newHighScores newUpd
             | ev' == EventCharacter 'r' -> game newHighScores
-            | otherwise -> atualizaTela state newScore gen' lvl newHighScores newUpd
+            | otherwise -> atualizaTela state newScore gen' newHighScores newUpd
         where
           (nextshape, gen') = formaAleatoria gen
           state = atualizar gameState nextshape
-          newScore = currentScore + (pontuacao gameState*(1+lvl))
+          newScore = currentScore + (pontuacao gameState)
 
       game :: [Int] -> Curses [Int]
       game scores = do
@@ -129,7 +125,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         case ev of
           Nothing -> game scores
           Just (EventCharacter c)
-            | isNumber c -> atualizaTela novoJogo 0 g (digitToInt c) scores True
+            | c == 's' -> atualizaTela novoJogo 0 g scores True
             | c == 'q' -> return scores
           Just _ -> game scores
 
@@ -168,8 +164,8 @@ mostrarMaiorPontuacao (i, s) = do
   drawString $ printf "%d.%10d" i s
 
 gradeTopo, gradeMeio, gradeBaixo :: String
-gradeTopo    = " ____________________ "
-gradeMeio = "|                    |"
+gradeTopo    = " _______TETRIS_______ "
+gradeMeio = "!                    !"
 gradeBaixo = " -------------------- "
 
 bloco :: String
