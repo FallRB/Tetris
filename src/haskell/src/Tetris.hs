@@ -2,7 +2,7 @@
 module Tetris(
     acelerar,
     adicionarBloco,
-    atualizarTela,
+    atualizar,
     descerBloco,
     fimDeJogo,
     formaAleatoria,
@@ -135,8 +135,8 @@ adicionarBloco fileiras formato'
   | otherwise = fileiras
 
 -- atualiza o estado atual da grade pela "gravidade" limpando as linhas e parando os blocos
-atualizarTela:: Grade -> Formato -> Grade
-atualizarTela = adicionarBloco . gravidade . limparLinhas . congelarBlocos
+atualizar:: Grade -> Formato -> Grade
+atualizar = adicionarBloco . gravidade . limparLinhas . congelarBlocos
 
 -- determina quando um determinado bloco está estacionado
 blocoEstacionario:: Maybe Bloco -> Bool
