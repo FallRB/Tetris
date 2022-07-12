@@ -106,10 +106,10 @@ playGame theHighScores = newStdGen >>= \g -> runCurses $ do
           Nothing -> updateScreen state newScore gen' lvl newHighScores newUpd
           Just ev'
             | ev' == EventCharacter 'q' -> return newHighScores
-            | ev' == EventSpecialKey KeyLeftArrow -> updateScreen (moverEsquerda state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventSpecialKey KeyRightArrow -> updateScreen (moverDireita state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventSpecialKey KeyDownArrow -> updateScreen (acelerar state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventSpecialKey KeyUpArrow -> updateScreen (rotacionar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'a' -> updateScreen (moverEsquerda state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'd' -> updateScreen (moverDireita state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 's' -> updateScreen (acelerar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'w' -> updateScreen (rotacionar state) newScore gen' lvl newHighScores newUpd
             | ev' == EventCharacter ' ' -> updateScreen (descerBloco state) newScore gen' lvl newHighScores newUpd
             | ev' == EventCharacter 'r' -> game newHighScores
             | otherwise -> updateScreen state newScore gen' lvl newHighScores newUpd
