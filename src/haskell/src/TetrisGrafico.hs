@@ -8,9 +8,9 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
-playGame :: [Int] -> IO [Int]
-playGame theHighScores = newStdGen >>= \g -> runCurses $ do
-  w <- defaultWindow
+iniciarJogo :: [Int] -> IO [Int]
+iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
+  janela <- defaultWindow
   gridcolor <- newColorID ColorBlue ColorDefault 1
   red <- newColorID ColorRed ColorRed 2
   green <- newColorID ColorGreen ColorGreen 3
@@ -94,14 +94,14 @@ playGame theHighScores = newStdGen >>= \g -> runCurses $ do
             | gameEnded && updatable = take 5 . reverse . sort $ currentScore : highScores
             | otherwise = highScores
           newUpd = not gameEnded
-        updateWindow w $ do
+        updateWindow janela $ do
           drawBlocks gameState
           drawScore currentScore
           drawLevel lvl
           when gameEnded drawGameOver
           drawHighScores newHighScores
         render
-        ev <- getEvent w (Just ((1+(9-toInteger lvl))*100))
+        ev <- getEvent janela (Just ((1+(9-toInteger lvl))*100))
         case ev of
           Nothing -> updateScreen state newScore gen' lvl newHighScores newUpd
           Just ev'
@@ -120,12 +120,12 @@ playGame theHighScores = newStdGen >>= \g -> runCurses $ do
 
       game :: [Int] -> Curses [Int]
       game scores = do
-        updateWindow w $ drawGrid gridY gridX gridcolor
-        updateWindow w levelMenu
-        updateWindow w clearStats
-        updateWindow w $ drawHighScores scores
+        updateWindow janela $ drawGrid gridY gridX gridcolor
+        updateWindow janela levelMenu
+        updateWindow janela clearStats
+        updateWindow janela $ drawHighScores scores
         render
-        ev <- getEvent w Nothing
+        ev <- getEvent janela Nothing
         case ev of
           Nothing -> game scores
           Just (EventCharacter c)
@@ -135,7 +135,7 @@ playGame theHighScores = newStdGen >>= \g -> runCurses $ do
 
   _ <- setCursorMode CursorInvisible
   setEcho False
-  game theHighScores
+  game placar
 
 drawBlock :: ColorID -> Update()
 drawBlock color = do
