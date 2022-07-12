@@ -1,4 +1,4 @@
-module TetrisGrafico where
+module TetrisCurses where
 
 import Control.Monad
 --import Data.Char
@@ -8,178 +8,178 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
-iniciarJogo:: [Int] -> IO [Int]
-iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
-  janela <- defaultWindow
-  corGrade <- newColorID ColorBlue ColorDefault 1
-  azul <- newColorID ColorBlue ColorBlue 2
-  vermelho <- newColorID ColorRed ColorRed 3
-  amarelo <- newColorID ColorYellow ColorYellow 4
-  ciano <- newColorID ColorCyan ColorCyan 5
-  verde <- newColorID ColorGreen ColorGreen 6
-  rosa <- newColorID ColorMagenta ColorMagenta 7
-  branco <- newColorID ColorWhite ColorWhite 8
-  corTexto <- newColorID ColorRed ColorDefault 9
+playGame :: [Int] -> IO [Int]
+playGame theHighScores = newStdGen >>= \g -> runCurses $ do
+  w <- defaultWindow
+  gridcolor <- newColorID ColorBlue ColorDefault 1
+  red <- newColorID ColorRed ColorRed 2
+  green <- newColorID ColorGreen ColorGreen 3
+  blue <- newColorID ColorBlue ColorBlue 4
+  yellow <- newColorID ColorYellow ColorYellow 5
+  cyan <- newColorID ColorCyan ColorCyan 6
+  white <- newColorID ColorWhite ColorWhite 7
+  magenta <- newColorID ColorMagenta ColorMagenta 8
+  redtext <- newColorID ColorRed ColorDefault 9
   let
-      desenhar:: Maybe Bloco -> Update()
-      desenhar (Just (Bloco I _ _)) = desenharBloco azul
-      desenhar (Just (Bloco S _ _)) = desenharBloco vermelho
-      desenhar (Just (Bloco O _ _)) = desenharBloco amarelo
-      desenhar (Just (Bloco T _ _)) = desenharBloco ciano
-      desenhar (Just (Bloco Z _ _)) = desenharBloco verde
-      desenhar (Just (Bloco J _ _)) = desenharBloco rosa
-      desenhar (Just (Bloco L _ _)) = desenharBloco branco
-      desenhar Nothing = desenharBloco corGrade
+      draw :: Maybe Block -> Update()
+      draw (Just (Block I _ _)) = drawBlock red
+      draw (Just (Block S _ _)) = drawBlock green
+      draw (Just (Block O _ _)) = drawBlock blue
+      draw (Just (Block T _ _)) = drawBlock yellow
+      draw (Just (Block Z _ _)) = drawBlock cyan
+      draw (Just (Block J _ _)) = drawBlock white
+      draw (Just (Block L _ _)) = drawBlock magenta
+      draw Nothing = drawBlock gridcolor
 
-      desenharBlocos :: Grade -> Update()
-      desenharBlocos [] = return ()
-      desenharBlocos l@(h:t) = do
-        when (length l <= fromIntegral fileiras) $ desenharLinha h y
-        desenharBlocos t
+      drawBlocks :: Grid -> Update()
+      drawBlocks [] = return ()
+      drawBlocks l@(h:t) = do
+        when (length l <= fromIntegral rows) $ drawLine h y
+        drawBlocks t
         where
-          y = (gradeY+fileiras)- toInteger (length t)
+          y = (gridY+rows)- toInteger (length t)
 
-      desenharLinha :: Fileira -> Integer -> Update()
-      desenharLinha [] _ = return ()
-      desenharLinha (h:t) y = do
-        let x = colunas - (toInteger (length bloco) * toInteger (length t))
-        moveCursor y $ gradeX + x + colunas
-        desenhar h
-        desenharLinha t y
+      drawLine :: Row -> Integer -> Update()
+      drawLine [] _ = return ()
+      drawLine (h:t) y = do
+        let x = columns - (toInteger (length block) * toInteger (length t))
+        moveCursor y $ gridX + x + columns
+        draw h
+        drawLine t y
 
-      mostrarFimDeJogo :: Update()
-      mostrarFimDeJogo = do
-        moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
-        setColor corTexto
+      drawGameOver :: Update()
+      drawGameOver = do
+        moveCursor (gridY + quot rows 2) (gridX + 8)
+        setColor redtext
         drawString "         "
-        moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
-        drawString "     FIM DE JOGO!    "
-        moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
+        moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
+        drawString "     FIM DE JOGO!     "
+        moveCursor (gridY + quot rows 2 + 2) (gridX + 2)
         drawString " 'r' para recomeçar "
 
-      mostrarPontos :: Int -> Update()
-      mostrarPontos scoreValue = do
-        moveCursor (gradeY - 1) (gradeX + 1)
-        setColor corTexto
+      drawScore :: Int -> Update()
+      drawScore scoreValue = do
+        moveCursor (gridY - 1) (gridX + 1)
+        setColor gridcolor
         let scorestr = show scoreValue
         drawString ("Pontuação: " ++ scorestr)
 
-      mostrarMaiorPontuacao :: [Int] -> Update ()
-      mostrarMaiorPontuacao pontos = setColor corTexto >> forM_ (zip [1..] pontos) mostrarMaiorPontuacao
+      drawHighScores :: [Int] -> Update ()
+      drawHighScores scores = setColor gridcolor >> forM_ (zip [1..] scores) drawHighScore
 
-      mostrarNivel :: Int -> Update()
-      mostrarNivel level = do
-        moveCursor (gradeY - 1) (gradeX + 15)
-        setColor corTexto
+      drawLevel :: Update()
+      drawLevel = do
+        moveCursor (gridY - 1) (gridX + 15)
+        setColor gridcolor
 
       levelMenu = do
-        setColor corTexto
+        setColor redtext
         drawString "                    "
-        moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
+        moveCursor (gridY + quot rows 2 + 1) (gridX + 2)
         drawString " 's' para começar"
 
-      limparStatus = do
-        moveCursor (gradeY - 1) (gradeX + 1)
-        setColor corGrade
+      clearStats = do
+        moveCursor (gridY - 1) (gridX + 1)
+        setColor gridcolor
         drawString "                      "
 
-      atualizarTela :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
-      atualizarTela estadoJogo pontuacaoAtual gen highScores updatable = do
+      updateScreen :: Grid -> Int -> StdGen -> [Int] -> Bool -> Curses [Int]
+      updateScreen gameState currentScore gen highScores updatable = do
         let
-          finalDeJogo = fimDeJogo estadoJogo
-          novoMaxPontos
-            | finalDeJogo && updatable = take 5 . reverse . sort $ pontuacaoAtual : highScores
+          gameEnded = gameOver gameState
+          newHighScores
+            | gameEnded && updatable = take 5 . reverse . sort $ currentScore : highScores
             | otherwise = highScores
-          novaAtualizacao = not finalDeJogo
-        atualizarTela janela $ do
-          desenharBlocos estadoJogo
-          mostrarPontos pontuacaoAtual
-          mostrarNivel
-          when finalDeJogo mostrarFimDeJogo
-          mostrarMaiorPontuacao novoMaxPontos
+          newUpd = not gameEnded
+        updateWindow w $ do
+          drawBlocks gameState
+          drawScore currentScore
+          drawLevel
+          when gameEnded drawGameOver
+          drawHighScores newHighScores
         render
-        ev <- getEvent janela (Just ((10)*100))
+        ev <- getEvent w (Just (10*100))
         case ev of
-          Nothing -> atualizarTela estado novaPontuacao gen' novoMaxPontos novaAtualizacao
+          Nothing -> updateScreen state newScore gen' newHighScores newUpd
           Just ev'
-            | ev' == EventCharacter 'q' -> return novoMaxPontos
-            | ev' == EventCharacter 'a' -> atualizarTela (moverEsquerda estado) novaPontuacao gen' novoMaxPontos novaAtualizacao
-            | ev' == EventCharacter 'd' -> atualizarTela (moverDireita estado) novaPontuacao gen' novoMaxPontos novaAtualizacao
-            | ev' == EventCharacter 's' -> atualizarTela (acelerar estado) novaPontuacao gen' novoMaxPontos novaAtualizacao
-            | ev' == EventCharacter 'w' -> atualizarTela (rotacionar estado) novaPontuacao gen' novoMaxPontos novaAtualizacao
-            | ev' == EventCharacter ' ' -> atualizarTela (descerBloco estado) novaPontuacao gen' novoMaxPontos novaAtualizacao
-            | ev' == EventCharacter 'r' -> jogo novoMaxPontos
-            | otherwise -> atualizarTela estado novaPontuacao gen' novoMaxPontos novaAtualizacao
+            | ev' == EventCharacter 'q' -> return newHighScores
+            | ev' == EventCharacter 'a' -> updateScreen (moveLeft state) newScore gen' newHighScores newUpd
+            | ev' == EventCharacter 'd' -> updateScreen (moveRight state) newScore gen' newHighScores newUpd
+            | ev' == EventCharacter 's' -> updateScreen (speedUp state) newScore gen' newHighScores newUpd
+            | ev' == EventCharacter 'w' -> updateScreen (rotate state) newScore gen' newHighScores newUpd
+            | ev' == EventCharacter ' ' -> updateScreen (dropBlock state) newScore gen' newHighScores newUpd
+            | ev' == EventCharacter 'r' -> game newHighScores
+            | otherwise -> updateScreen state newScore gen' newHighScores newUpd
         where
-          (nextshape, gen') = formaAleatoria gen
-          estado = atualizarTela estadoJogo nextshape
-          novaPontuacao = pontuacaoAtual + (pontuacao estadoJogo)
+          (nextshape, gen') = randomShape gen
+          state = update gameState nextshape
+          newScore = currentScore + (score gameState)
 
-      jogo :: [Int] -> Curses [Int]
-      jogo pontos = do
-        atualizarTela janela $ desenharGrade gradeY gradeX corGrade
-        atualizarTela janela levelMenu
-        atualizarTela janela limparStatus
-        atualizarTela janela $ mostrarMaiorPontuacao pontos
+      game :: [Int] -> Curses [Int]
+      game scores = do
+        updateWindow w $ drawGrid gridY gridX gridcolor
+        updateWindow w levelMenu
+        updateWindow w clearStats
+        updateWindow w $ drawHighScores scores
         render
-        ev <- getEvent janela Nothing
+        ev <- getEvent w Nothing
         case ev of
-          Nothing -> jogo pontos
+          Nothing -> game scores
           Just (EventCharacter c)
-            | c == 's' -> atualizarTela novoJogo 0 g pontos True
-            | c == 'q' -> return pontos
-          Just _ -> jogo pontos
+            | c == 's' -> updateScreen newGame 0 g scores True
+            | c == 'q' -> return scores
+          Just _ -> game scores
 
   _ <- setCursorMode CursorInvisible
   setEcho False
-  jogo placar
+  game theHighScores
 
-desenharBloco :: ColorID -> Update()
-desenharBloco cor = do
-  setColor cor
-  drawString bloco
+drawBlock :: ColorID -> Update()
+drawBlock color = do
+  setColor color
+  drawString block
 
-desenharGrade :: Integer -> Integer -> ColorID -> Update()
-desenharGrade y x c = do
+drawGrid :: Integer -> Integer -> ColorID -> Update()
+drawGrid y x c = do
   setColor c
   moveCursor y (x+1)
-  drawString gradeTopo
-  desenharLinhas (y+1) (x+1)
-  moveCursor (fileiras+y+1) (x+1)
-  drawString gradeBaixo
+  drawString gridTop
+  drawLines (y+1) (x+1)
+  moveCursor (rows+y+1) (x+1)
+  drawString gridBottom
 
-desenharLinhas :: Integer -> Integer -> Update()
-desenharLinhas y x = desenharLinhas' y x fileiras
+drawLines :: Integer -> Integer -> Update()
+drawLines y x = drawLines' y x rows
 
-desenharLinhas' :: Integer -> Integer -> Integer -> Update()
-desenharLinhas' y x n
+drawLines' :: Integer -> Integer -> Integer -> Update()
+drawLines' y x n
   | n < 1 = return()
   | otherwise = do
       moveCursor y x
-      drawString gradeMeio
-      desenharLinhas' (y+1) x (n-1)
+      drawString gridMiddle
+      drawLines' (y+1) x (n-1)
 
-mostrarMaiorPontuacao :: (Integer, Int) -> Update ()
-mostrarMaiorPontuacao (i, s) = do
-  moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
+drawHighScore :: (Integer, Int) -> Update ()
+drawHighScore (i, s) = do
+  moveCursor (gridY + rows + 1 + i) (gridX + 6)
   drawString $ printf "%d.%10d" i s
 
-gradeTopo, gradeMeio, gradeBaixo :: String
-gradeTopo = " _______TETRIS_______ "
-gradeMeio = "!                    !"
-gradeBaixo = " -------------------- "
+gridTop, gridMiddle, gridBottom :: String
+gridTop    = " _______TETRIS_______ "
+gridMiddle = "!                    !"
+gridBottom = " -------------------- "
 
-bloco :: String
-bloco = " ."
+block :: String
+block = " ."
 
-gradeX :: Integer
-gradeX = 50
+gridX :: Integer
+gridX = 50
 
-gradeY :: Integer
-gradeY = 4
+gridY :: Integer
+gridY = 4
 
-fileiras :: Integer
-fileiras = toInteger (length novoJogo - 4)
+rows :: Integer
+rows = toInteger (length newGame - 4)
 
-colunas :: Integer
-colunas = toInteger (length (head novoJogo))
+columns :: Integer
+columns = toInteger (length (head newGame))
