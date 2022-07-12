@@ -86,8 +86,8 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         setColor corGrade
         drawString "                      "
 
-      updateScreen :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
-      updateScreen gameState currentScore gen lvl highScores updatable = do
+      atualizaTela :: Grade -> Int -> StdGen -> Int -> [Int] -> Bool -> Curses [Int]
+      atualizaTela gameState currentScore gen lvl highScores updatable = do
         let
           gameEnded = fimDeJogo gameState
           newHighScores
@@ -103,16 +103,16 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         render
         ev <- getEvent janela (Just ((1+(9-toInteger lvl))*100))
         case ev of
-          Nothing -> updateScreen state newScore gen' lvl newHighScores newUpd
+          Nothing -> atualizaTela state newScore gen' lvl newHighScores newUpd
           Just ev'
             | ev' == EventCharacter 'q' -> return newHighScores
-            | ev' == EventCharacter 'a' -> updateScreen (moverEsquerda state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 'd' -> updateScreen (moverDireita state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 's' -> updateScreen (acelerar state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter 'w' -> updateScreen (rotacionar state) newScore gen' lvl newHighScores newUpd
-            | ev' == EventCharacter ' ' -> updateScreen (descerBloco state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'a' -> atualizaTela (moverEsquerda state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'd' -> atualizaTela (moverDireita state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 's' -> atualizaTela (acelerar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter 'w' -> atualizaTela (rotacionar state) newScore gen' lvl newHighScores newUpd
+            | ev' == EventCharacter ' ' -> atualizaTela (descerBloco state) newScore gen' lvl newHighScores newUpd
             | ev' == EventCharacter 'r' -> game newHighScores
-            | otherwise -> updateScreen state newScore gen' lvl newHighScores newUpd
+            | otherwise -> atualizaTela state newScore gen' lvl newHighScores newUpd
         where
           (nextshape, gen') = formaAleatoria gen
           state = atualizarTela gameState nextshape
@@ -120,7 +120,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
 
       game :: [Int] -> Curses [Int]
       game scores = do
-        updateWindow janela $ drawGrid gradeY gradeX corGrade
+        updateWindow janela $ desenharGrade gradeY gradeX corGrade
         updateWindow janela levelMenu
         updateWindow janela clearStats
         updateWindow janela $ drawHighScores scores
@@ -129,7 +129,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         case ev of
           Nothing -> game scores
           Just (EventCharacter c)
-            | isNumber c -> updateScreen novoJogo 0 g (digitToInt c) scores True
+            | isNumber c -> atualizaTela novoJogo 0 g (digitToInt c) scores True
             | c == 'q' -> return scores
           Just _ -> game scores
 
@@ -142,8 +142,8 @@ desenharBloco color = do
   setColor color
   drawString bloco
 
-drawGrid :: Integer -> Integer -> ColorID -> Update()
-drawGrid y x c = do
+desenharGrade :: Integer -> Integer -> ColorID -> Update()
+desenharGrade y x c = do
   setColor c
   moveCursor y (x+1)
   drawString gradeTopo
