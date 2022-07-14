@@ -66,11 +66,6 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       drawHighScores :: [Int] -> Update ()
       drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarMaiorPontuacao
 
-      drawLevel :: Update()
-      drawLevel = do
-        moveCursor (gradeY - 1) (gradeX + 15)
-        setColor corTexto
-
       levelMenu = do
         setColor corTexto
         drawString "                    "
@@ -93,11 +88,10 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         updateWindow janela $ do
           desenharBlocos gameState
           mostrarPontuacao currentScore
-          drawLevel
           when gameEnded desenharFimDeJogo
           drawHighScores newHighScores
         render
-        ev <- getEvent janela (Just (10*100))
+        ev <- getEvent janela (Just (1000)) -- timeout: 1000ms = 1 seg
         case ev of
           Nothing -> atualizaTela state newScore gen' newHighScores newUpd
           Just ev'
@@ -133,11 +127,13 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   setEcho False
   game placar
 
+-- desenha o bloco preenchido na cor recebida como parametro
 desenharBloco :: ColorID -> Update()
 desenharBloco color = do
   setColor color
   drawString bloco
 
+-- desenha a grade (tela/background) do jogo
 desenharGrade :: Integer -> Integer -> ColorID -> Update()
 desenharGrade y x c = do
   setColor c
@@ -147,9 +143,11 @@ desenharGrade y x c = do
   moveCursor (fileiras+y+1) (x+1)
   drawString gradeBaixo
 
+-- usa desenharLinhas' para desenhar as laterais da 'tela' do jogo
 desenharLinhas :: Integer -> Integer -> Update()
 desenharLinhas y x = desenharLinhas' y x fileiras
 
+-- desenha as laterais da 'tela' linha por linha
 desenharLinhas' :: Integer -> Integer -> Integer -> Update()
 desenharLinhas' y x n
   | n < 1 = return()
@@ -163,6 +161,7 @@ mostrarMaiorPontuacao (i, s) = do
   moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
   drawString $ printf "%d.%10d" i s
 
+-- criando o formato da 'tela' do jogo
 gradeTopo, gradeMeio, gradeBaixo :: String
 gradeTopo    = " _______TETRIS_______ "
 gradeMeio = "!                    !"
