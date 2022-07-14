@@ -30,24 +30,24 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       desenhar (Just (Bloco L _ _)) = desenharBloco magenta
       desenhar Nothing = desenharBloco corGrade
 
-      desenharBlocos :: Grade -> Update()
+      desenharBlocos:: Grade -> Update()
       desenharBlocos [] = return ()
-      desenharBlocos l@(h:t) = do
-        when (length l <= fromIntegral fileiras) $ desenharLinha h y
-        desenharBlocos t
+      desenharBlocos l@(cabeca:cauda) = do
+        when (length l <= fromIntegral fileiras) $ desenharLinha cabeca y
+        desenharBlocos cauda
         where
-          y = (gradeY+fileiras)- toInteger (length t)
+          y = (gradeY+fileiras) - toInteger (length cauda)
 
       desenharLinha :: Fileira -> Integer -> Update()
       desenharLinha [] _ = return ()
-      desenharLinha (h:t) y = do
-        let x = colunas - (toInteger (length bloco) * toInteger (length t))
+      desenharLinha (cabeca:cauda) y = do
+        let x = colunas - (toInteger (length bloco) * toInteger (length cauda))
         moveCursor y $ gradeX + x + colunas
-        desenhar h
-        desenharLinha t y
+        desenhar cabeca
+        desenharLinha cauda y
 
-      desenharFimDeJogo  :: Update()
-      desenharFimDeJogo  = do
+      desenharFimDeJogo:: Update()
+      desenharFimDeJogo = do
         moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
         setColor corTexto
         drawString "         "
@@ -56,23 +56,23 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
         drawString " 'r' para reiniciar "
 
-      mostrarPontuacao :: Int -> Update()
+      mostrarPontuacao:: Int -> Update()
       mostrarPontuacao scoreValue = do
         moveCursor (gradeY - 1) (gradeX + 1)
         setColor corTexto
         let scorestr = show scoreValue
         drawString ("Pontuação: " ++ scorestr)
 
-      drawHighScores :: [Int] -> Update ()
-      drawHighScores scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarMaiorPontuacao
+      desenharPlacar:: [Int] -> Update ()
+      desenharPlacar scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarPlacar
 
-      levelMenu = do
+      menuInicial = do
         setColor corTexto
         drawString "                    "
         moveCursor (gradeY + quot fileiras 2 + 1) (gradeX + 2)
         drawString " 's' para começar"
 
-      clearStats = do
+      limparPontuacao = do
         moveCursor (gradeY - 1) (gradeX + 1)
         setColor corGrade
         drawString "                      "
@@ -89,7 +89,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
           desenharBlocos gameState
           mostrarPontuacao currentScore
           when gameEnded desenharFimDeJogo
-          drawHighScores newHighScores
+          desenharPlacar newHighScores
         render
         ev <- getEvent janela (Just (1000)) -- timeout: 1000ms = 1 seg
         case ev of
@@ -111,9 +111,9 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       game :: [Int] -> Curses [Int]
       game scores = do
         updateWindow janela $ desenharGrade gradeY gradeX corGrade
-        updateWindow janela levelMenu
-        updateWindow janela clearStats
-        updateWindow janela $ drawHighScores scores
+        updateWindow janela menuInicial
+        updateWindow janela limparPontuacao
+        updateWindow janela $ desenharPlacar scores
         render
         ev <- getEvent janela Nothing
         case ev of
@@ -156,8 +156,8 @@ desenharLinhas' y x n
       drawString gradeMeio
       desenharLinhas' (y+1) x (n-1)
 
-mostrarMaiorPontuacao :: (Integer, Int) -> Update ()
-mostrarMaiorPontuacao (i, s) = do
+mostrarPlacar:: (Integer, Int) -> Update ()
+mostrarPlacar (i, s) = do
   moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
   drawString $ printf "%d.%10d" i s
 
