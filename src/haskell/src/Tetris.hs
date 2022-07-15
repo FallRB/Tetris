@@ -9,7 +9,7 @@ module Tetris(
     moverDireita,
     moverEsquerda,
     novoJogo,
-     acao,
+    pontuacao,
     rotacionar,
     Bloco(..),
     Formato(..),
