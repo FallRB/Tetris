@@ -7,6 +7,7 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
+-- função que inicia o jogo, faz conexão com o main
 iniciarJogo:: [Int] -> IO [Int]
 iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   janela <- defaultWindow
@@ -20,6 +21,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   magenta <- newColorID ColorMagenta ColorMagenta 8
   corTexto <- newColorID ColorRed ColorDefault 9
   let
+      -- função que desenha os formatos de blocos
       desenhar:: Maybe Bloco -> Update()
       desenhar (Just (Bloco I _ _)) = desenharBloco vermelho
       desenhar (Just (Bloco S _ _)) = desenharBloco verde
