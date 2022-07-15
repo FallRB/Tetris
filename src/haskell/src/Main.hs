@@ -17,7 +17,7 @@ getPontuacao = do
 
 -- escreve a pontuação em um arquivo para guardá-la
 guardarPontuacao:: [Int] -> IO()
-guardarPontuacao = writeFile arquivoPontuacao . show . take pontuacaoMaxima . filter (> 0)
+guardarPontuacao = writeFile arquivoPontuacao . show . filter (> 0)
 
 -- filepath do arquivo que guarda a pontuação
 arquivoPontuacao:: FilePath
