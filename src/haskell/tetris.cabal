@@ -1,7 +1,4 @@
 name:                tetris
-version:             0.1.0.0
-author:              Haukur Rosinkranz & Christophe Vilain
-maintainer:          hauxir@gmail.com
 category:            Game
 build-type:          Simple
 cabal-version:       >=1.10
