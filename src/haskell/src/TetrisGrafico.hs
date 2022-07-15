@@ -1,10 +1,14 @@
 module TetrisGrafico where
 
+-- permite mapear valores de a em b respeitando a estrutura da função geradora
 import Control.Monad
 import Data.List
 import System.Random
+-- importando a parte lógica do jogo
 import Tetris
+-- permite a manipulação de strings com maior facilidade
 import Text.Printf
+-- permite a criação de uma interface pseudo-gráfica, mais agradável ao usuário
 import UI.NCurses
 
 -- definições a serem utilizadas no código
@@ -132,7 +136,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
           state = atualizar gameState nextshape
           newScore = currentScore + (pontuacao gameState)
 
-      -- Executa o jogo
+      -- executa o jogo
       game :: [Int] -> Curses [Int]
       game scores = do
         updateWindow janela $ desenharGrade gradeY gradeX corGrade
