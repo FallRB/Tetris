@@ -7,6 +7,22 @@ import Tetris
 import Text.Printf
 import UI.NCurses
 
+-- definições a serem utilizadas no código
+bloco :: String
+bloco = " ."
+
+gradeX :: Integer
+gradeX = 50
+
+gradeY :: Integer
+gradeY = 4
+
+fileiras :: Integer
+fileiras = toInteger (length novoJogo - 4)
+
+colunas :: Integer
+colunas = toInteger (length (head novoJogo))
+
 -- função que inicia o jogo, faz conexão com o main
 iniciarJogo:: [Int] -> IO [Int]
 iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
@@ -21,7 +37,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
   magenta <- newColorID ColorMagenta ColorMagenta 8
   corTexto <- newColorID ColorRed ColorDefault 9
   let
-      -- função que desenha os formatos de blocos
+      -- desenha os formatos de blocos e define as cores dos blocos
       desenhar:: Maybe Bloco -> Update()
       desenhar (Just (Bloco I _ _)) = desenharBloco vermelho
       desenhar (Just (Bloco S _ _)) = desenharBloco verde
@@ -32,6 +48,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
       desenhar (Just (Bloco L _ _)) = desenharBloco magenta
       desenhar Nothing = desenharBloco corGrade
 
+      -- desenha um bloco
       desenharBlocos:: Grade -> Update()
       desenharBlocos [] = return ()
       desenharBlocos l@(cabeca:cauda) = do
@@ -40,6 +57,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         where
           y = (gradeY+fileiras) - toInteger (length cauda)
 
+      -- desenha em uma fileira recebida
       desenharLinha :: Fileira -> Integer -> Update()
       desenharLinha [] _ = return ()
       desenharLinha (cabeca:cauda) y = do
@@ -48,6 +66,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         desenhar cabeca
         desenharLinha cauda y
 
+      -- mostra a mensagem de fim de jogo
       desenharFimDeJogo:: Update()
       desenharFimDeJogo = do
         moveCursor (gradeY + quot fileiras 2) (gradeX + 8)
@@ -58,6 +77,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         moveCursor (gradeY + quot fileiras 2 + 2) (gradeX + 2)
         drawString " 'r' para reiniciar "
 
+      -- desenha a mensagem de pontuação acima do jogo
       mostrarPontuacao:: Int -> Update()
       mostrarPontuacao scoreValue = do
         moveCursor (gradeY - 1) (gradeX + 1)
@@ -65,6 +85,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         let scorestr = show scoreValue
         drawString ("Pontuação: " ++ scorestr)
 
+      -- recebe o placar e o coloca no formato certo para ser impresso na tela
       desenharPlacar:: [Int] -> Update ()
       desenharPlacar scores = setColor corTexto >> forM_ (zip [1..] scores) mostrarPlacar
 
@@ -79,6 +100,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
         setColor corGrade
         drawString "                      "
 
+      -- atualiza os componentes da tela a cada tecla apertada ou segundo passado
       atualizaTela :: Grade -> Int -> StdGen -> [Int] -> Bool -> Curses [Int]
       atualizaTela gameState currentScore gen highScores updatable = do
         let
@@ -110,6 +132,7 @@ iniciarJogo placar = newStdGen >>= \g -> runCurses $ do
           state = atualizar gameState nextshape
           newScore = currentScore + (pontuacao gameState)
 
+      -- Executa o jogo
       game :: [Int] -> Curses [Int]
       game scores = do
         updateWindow janela $ desenharGrade gradeY gradeX corGrade
@@ -145,7 +168,7 @@ desenharGrade y x c = do
   moveCursor (fileiras+y+1) (x+1)
   drawString gradeBaixo
 
--- usa desenharLinhas' para desenhar as laterais da 'tela' do jogo
+-- usa a função auxiliar desenharLinhas' para desenhar as laterais da 'tela' do jogo
 desenharLinhas :: Integer -> Integer -> Update()
 desenharLinhas y x = desenharLinhas' y x fileiras
 
@@ -158,6 +181,7 @@ desenharLinhas' y x n
       drawString gradeMeio
       desenharLinhas' (y+1) x (n-1)
 
+-- imprime na tela o placar do jogo
 mostrarPlacar:: (Integer, Int) -> Update ()
 mostrarPlacar (i, s) = do
   moveCursor (gradeY + fileiras + 1 + i) (gradeX + 6)
@@ -168,18 +192,3 @@ gradeTopo, gradeMeio, gradeBaixo :: String
 gradeTopo    = " _______TETRIS_______ "
 gradeMeio = "!                    !"
 gradeBaixo = " -------------------- "
-
-bloco :: String
-bloco = " ."
-
-gradeX :: Integer
-gradeX = 50
-
-gradeY :: Integer
-gradeY = 4
-
-fileiras :: Integer
-fileiras = toInteger (length novoJogo - 4)
-
-colunas :: Integer
-colunas = toInteger (length (head novoJogo))
