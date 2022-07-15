@@ -28,8 +28,8 @@ pontuacaoMaxima:: Int
 pontuacaoMaxima = 10
 
 -- converte a pontuação do arquivo para uma lista de inteiro
-convertePontuacao:: String -> [Int]
-convertePontuacao pont
+converterPontuacao:: String -> [Int]
+converterPontuacao pont
   | null lerPontuacao = []
   | otherwise = fst . head $ lerPontuacao
   where
