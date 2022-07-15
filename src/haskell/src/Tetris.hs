@@ -9,7 +9,7 @@ module Tetris(
     moverDireita,
     moverEsquerda,
     novoJogo,
-    pontuacao,
+     acao,
     rotacionar,
     Bloco(..),
     Formato(..),
@@ -18,8 +18,11 @@ module Tetris(
 ) where
 
 -- importando bibliotecas
+-- responsável por disponibilizar funções uteis para manipulação de listas
 import Data.List
+-- responsável por encapsular valores opcionais e evitar casos de error caso venham a ocorrer
 import Data.Maybe
+-- gera números pseudo-aleatórios, para tomar decisões dentro do jogo, como qual bloco da vez
 import System.Random
 
 -- dados para gerar o bloco baseado no formato
@@ -319,7 +322,7 @@ removerLinhas = filter (not . linhaCompleta)
 rotacionar:: Grade -> Grade
 rotacionar g = girar (limparGrade g) (rotacionarBloco g) (map (getBloco g) (coordenadas g))
 
--- rotaciona o globo no sentido horario
+-- rotaciona o bloco no sentido horario
 rotacionarBloco:: Grade -> [(Int,Int)]
 rotacionarBloco grade
   | temOrigem grade && all (estaDisponivel grade) rotacionado = rotacionado
