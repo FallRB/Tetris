@@ -13,7 +13,7 @@ main = do
 getPontuacao:: IO [Int]
 getPontuacao = do
   temArquivo <- doesFileExist arquivoPontuacao
-  if not temArquivo then return [] else calcularPontuacao <$> readFile arquivoPontuacao
+  if not temArquivo then return [] else converterPontuacao <$> readFile arquivoPontuacao
 
 -- escreve a pontuação em um arquivo para guardá-la
 guardarPontuacao:: [Int] -> IO()
@@ -27,9 +27,9 @@ arquivoPontuacao = "pontuacao"
 pontuacaoMaxima:: Int
 pontuacaoMaxima = 10
 
--- calcula a pontuação do jogo 
-calcularPontuacao:: String -> [Int]
-calcularPontuacao pont
+-- converte a pontuação do arquivo para uma lista de inteiro
+convertePontuacao:: String -> [Int]
+convertePontuacao pont
   | null lerPontuacao = []
   | otherwise = fst . head $ lerPontuacao
   where
