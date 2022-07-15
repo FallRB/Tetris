@@ -17,17 +17,17 @@ getPontuacao = do
 
 -- escreve a pontuação em um arquivo para guardá-la
 guardarPontuacao:: [Int] -> IO()
-guardarPontuacao = writeFile arquivoPontuacao . show . filter (> 0)
+guardarPontuacao = writeFile arquivoPontuacao . show . take pontuacaoMaxima . filter (> 0)
 
 -- filepath do arquivo que guarda a pontuação
 arquivoPontuacao:: FilePath
 arquivoPontuacao = "pontuacao"
 
--- definição da pontuação máxima
+-- pontuação máxima que ganha o jogo
 pontuacaoMaxima:: Int
 pontuacaoMaxima = 10
 
--- Calcula a pontuação do jogo 
+-- calcula a pontuação do jogo 
 calcularPontuacao:: String -> [Int]
 calcularPontuacao pont
   | null lerPontuacao = []
